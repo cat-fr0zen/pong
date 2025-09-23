@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr">
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pong</title>
-    <script defer src="pong.js"></script>
+    <script defer src="pong.js" ></script>
     <link rel="stylesheet" href="pong.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   </head>
 
   <body>
+
     <header id="hautdepage">
-        <h1 id="titre_jeu">Pong</h1>
+      <h1 id="titre_jeu">Pong</h1>
     </header>
 
     <main id="milieudepage">
-        <canvas id="écran_de_jeu">
-            <section id="affichage" aria-live="polite">Score :</section>
-            <button id="start">Start</button>
-            <button id="reset">Reset</button>
-        </canvas>
+      <div class="canvas-container">
+        <canvas id="écran_de_jeu" ></canvas>
+      </div>
+      <div class="controls">
+        <button id="start"><i class="fa-solid fa-play"></i></button>
+        <button id="reset"><i class="fa-solid fa-rotate"></i></button>
+      </div>
     </main>
 
-    
     <footer id="basdepage">
       @ ducret mattheo
       <a href="https://github.com/cat-fr0zen" target="_blank" class="lien">my github</a>
     </footer>
-  
-</body>
+
+  </body>
 
 </html>
