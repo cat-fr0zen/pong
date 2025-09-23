@@ -27,6 +27,36 @@ let balle = {
     dy: 0
 };
 
+document.getElementById('start').onclick = () => {
+    if (!gameRunning) startGame();
+};
+
+//** document.getElementById('start') fait référence au bouton de démarrage */
+
+document.getElementById('reset').onclick = () => {
+    gameRunning = false;
+    gameOver = false;
+    score = 0;
+    draw();
+};
+
+//** document.getElementById('reset') fait référence au bouton de réinitialisation */
+
+// Contrôles clavier
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") raquette.dx = -raquette.speed;
+    if (e.key === "ArrowRight") raquette.dx = raquette.speed;
+});
+
+//** document.addEventListener('keydown') fait référence aux touches enfoncées */
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") raquette.dx = 0;
+});
+
+//** document.addEventListener('keyup') fait référence aux touches relâchées */
+
+
 /**
  * Démarre une nouvelle partie
  * Initialise les variables et positionne la balle et la raquette
@@ -54,6 +84,106 @@ function startGame() {// Démarre une nouvelle partie
     draw();// Dessine l'état initial du jeu
     requestAnimationFrame(update);// Lance la boucle de mise à jour du jeu
 }
+
+/** fonction startGame() : Démarre une nouvelle partie */
+
+function draw() {// Dessine tous les éléments du jeu
+    ctx.clearRect(0, 0, canvas.width, canvas.height);// Efface le canvas
+
+    // Balle
+    ctx.beginPath();
+    ctx.arc(balle.x, balle.y, balle.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.closePath();
+
+    // Raquette
+    ctx.fillStyle = "#4af";
+    ctx.fillRect(raquette.x, raquette.y, raquette.w, raquette.h);
+
+    // Score
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.textAlign = "center";
+    ctx.fillText(`Score : ${score}s`, canvas.width / 2, canvas.height - 10);
+
+    // Message de fin
+    if (gameOver) {
+        ctx.font = "32px Arial";
+        ctx.fillStyle = "#f44";
+        ctx.fillText("Perdu !", canvas.width / 2, canvas.height / 2);
+        ctx.font = "18px Arial";
+        ctx.fillStyle = "#fff";
+        ctx.fillText("Appuie sur Start pour rejouer", canvas.width / 2, canvas.height / 2 + 40);
+    }
+}
+
+/**
+* fonction draw() : Dessine tous les éléments du jeu (balle, raquette, score, message de fin)
+ */
+
+function update() {
+    if (!gameRunning) return;
+
+    // Déplacement de la balle
+    balle.x += balle.dx;
+    balle.y += balle.dy;
+
+    // Collisions avec les murs
+    if (balle.x - balle.r < 0) {
+        balle.x = balle.r;
+        balle.dx *= -1;
+    }
+    if (balle.x + balle.r > canvas.width) {
+        balle.x = canvas.width - balle.r;
+        balle.dx *= -1;
+    }
+    if (balle.y - balle.r < 0) {
+        balle.y = balle.r;
+        balle.dy *= -1;
+    }
+
+    // Collision avec la raquette
+    if (
+        balle.y + balle.r >= raquette.y &&
+        balle.x > raquette.x &&
+        balle.x < raquette.x + raquette.w &&
+        balle.dy > 0
+    ) {
+        balle.y = raquette.y - balle.r;
+        balle.dy *= -1;
+    }
+
+    // Si la balle est ratée
+    if (balle.y - balle.r > canvas.height) {
+        gameRunning = false;
+        gameOver = true;
+        draw();
+        return;
+    }
+
+    // Déplacement de la raquette
+    raquette.x += raquette.dx;
+    if (raquette.x < 0) raquette.x = 0;
+    if (raquette.x + raquette.w > canvas.width) raquette.x = canvas.width - raquette.w;
+
+    // Score
+    score = Math.floor((Date.now() - startTime) / 1000);
+
+    draw();
+    requestAnimationFrame(update);
+}
+
+/**
+* fonction update() : Met à jour l'état du jeu (position de la balle, collisions, score)
+ */
+draw(); // Dessine l'état initial
+update(); // Lance la boucle de mise à jour du jeu
+
+
+
+
+
 
 
 
