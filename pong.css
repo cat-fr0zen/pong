@@ -11,34 +11,11 @@ header, footer {
   padding: 20px 0;
 }
 
-#titre_jeu {
-  margin: 0;
-  font-size: 2.5em;
-}
-
 main {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 30px;
-}
-
-.canvas-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#écran_de_jeu {
-  background: #000;
-  border: 4px solid #fff;
-  display: block;
-  width: 350px;
-  height: 600px;
-}
-
-.controls {
-  margin-top: 20px;
 }
 
 button {
@@ -50,11 +27,41 @@ button {
   font-size: 1.1em;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
-button:hover {
-  background: #666;
+#titre_jeu {
+  margin: 0;
+  font-size: 2.5em;
+}
+
+#écran_de_jeu {
+  background: #000;
+  border: 4px solid #fff;
+  display: block;
+  width: 300px;
+  height: 500px;
+}
+
+#btnparam {
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+
+#leftBtn, #rightBtn {
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;         
+  -webkit-tap-highlight-color: transparent;
+}
+
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .lien {
@@ -66,3 +73,12 @@ button:hover {
 .lien:hover {
   text-decoration: underline;
 }
+
+
+
+
+
+
+
+
+

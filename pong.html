@@ -7,23 +7,31 @@
     <title>Pong</title>
     <script defer src="pong.js" ></script>
     <link rel="stylesheet" href="pong.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </head>
 
   <body>
 
     <header id="hautdepage">
-      <h1 id="titre_jeu">Pong</h1>
+      <h1 id="titre_jeu">SOLO Pong</h1>
     </header>
 
     <main id="milieudepage">
-      <div class="canvas-container">
+
+      <div id="canvas-container">
         <canvas id="écran_de_jeu" ></canvas>
       </div>
-      <div class="controls">
+
+      <div id="btnparam">
         <button id="start"><i class="fa-solid fa-play"></i></button>
         <button id="reset"><i class="fa-solid fa-rotate"></i></button>
       </div>
+
+      <divi>
+        <button id="leftBtn" style=><i class="fa fa-arrow-left"></i></button>
+        <button id="rightBtn"><i class="fa fa-arrow-right"></i></button>
+      </div>
+
     </main>
 
     <footer id="basdepage">

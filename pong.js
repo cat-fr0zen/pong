@@ -1,189 +1,219 @@
+/* Jeu de Pong simple avec raquette contrôlée par flèches, boutons et tactile*/
 const canvas = document.getElementById('écran_de_jeu');
 const ctx = canvas.getContext('2d');
+// Taille du canvas
 canvas.width = 350;
 canvas.height = 600;
-let score = 0;// le score du joueur
-let startTime = 0;// le temps de début du jeu
-let gameRunning = false;// état du jeu (en cours ou non)
-let gameOver = false;// état du jeu
+// Variables de jeu
+let score = 0;        
+let startTime = 0; 
+let gameRunning = false;
+let gameOver = false;
+// Boutons
+const startBtn = document.getElementById('start');
+const resetBtn = document.getElementById('reset');
+const leftBtn  = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
 
-// la raquette du joueur(objet)
+// Raquette
 let raquette = {
-    w: 80,
-    h: 15,
-    x: canvas.width / 2 - 40,
-    y: canvas.height - 30,
-    speed: 7,
-    dx: 0
+  w: 80,
+  h: 15,
+  x: canvas.width / 2 - 40,
+  y: canvas.height - 30,
+  speed: 7,
+  dx: 0
 };
 
-// la balle (objet)
+// Balle
 let balle = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    r: 10,
-    speed: 4,
-    dx: 0,
-    dy: 0
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  r: 10,
+  speed: 4,
+  dx: 0,
+  dy: 0
 };
 
-document.getElementById('start').onclick = () => {
-    if (!gameRunning) startGame();
+
+
+//bouton Démarrer / Reset
+startBtn.onclick = () => {
+  if (!gameRunning) startGame();
 };
 
-//** document.getElementById('start') fait référence au bouton de démarrage */
-
-document.getElementById('reset').onclick = () => {
-    gameRunning = false;
-    gameOver = false;
-    score = 0;
-    draw();
+resetBtn.onclick = () => {
+  gameRunning = false;
+  gameOver = false;
+  score = 0;
+  raquette.dx = 0;
+  balle.dx = 0;
+  balle.dy = 0;
+  draw();
 };
 
-//** document.getElementById('reset') fait référence au bouton de réinitialisation */
+// Clavier (uniquement pour les flèches gauche/droite)
+let keyLeftDown = false;
+let keyRightDown = false;
 
-// Contrôles clavier
+
 document.addEventListener('keydown', (e) => {
-    if (e.key === "ArrowLeft") raquette.dx = -raquette.speed;
-    if (e.key === "ArrowRight") raquette.dx = raquette.speed;
+  if (e.key === "ArrowLeft") {
+    keyLeftDown = true;
+    raquette.dx = -raquette.speed;
+  }
+  if (e.key === "ArrowRight") {
+    keyRightDown = true;
+    raquette.dx = raquette.speed;
+  }
 });
-
-//** document.addEventListener('keydown') fait référence aux touches enfoncées */
 
 document.addEventListener('keyup', (e) => {
-    if (e.key === "ArrowLeft" || e.key === "ArrowRight") raquette.dx = 0;
+  if (e.key === "ArrowLeft") keyLeftDown = false;
+  if (e.key === "ArrowRight") keyRightDown = false;
+  if (!keyLeftDown && !keyRightDown) raquette.dx = 0;
 });
 
-//** document.addEventListener('keyup') fait référence aux touches relâchées */
-
-
-/**
- * Démarre une nouvelle partie
- * Initialise les variables et positionne la balle et la raquette
- * Lance la boucle de mise à jour du jeu  */
- 
-function startGame() {// Démarre une nouvelle partie
-    if (gameRunning) return; // Empêche de démarrer une nouvelle partie si le jeu est déjà en cours
-    gameRunning = true; // Met l'état du jeu à "en cours"
-    gameOver = false;// Réinitialise l'état de fin de jeu
-    score = 0; // Réinitialise le score
-    startTime = Date.now();// Enregistre le temps de début du jeu
-
-    // Position initiale de la balle
-    balle.x = canvas.width / 2;// Position horizontale au centre du canvas
-    balle.y = canvas.height / 2;// Position verticale au centre du canvas
-
-    // Angle aléatoire entre 30° et 150°
-    let angle = (Math.random() * 120 + 30) * Math.PI / 180;// Convertit l'angle en radians
-    balle.dx = balle.speed * Math.cos(angle);// Vitesse horizontale basée sur l'angle
-    balle.dy = -balle.speed * Math.sin(angle);// Vitesse verticale basée sur l'angle (négative pour aller vers le haut)
-
-    // Position initiale de la raquette
-    raquette.x = canvas.width / 2 - raquette.w / 2;// Centre la raquette horizontalement
-
-    draw();// Dessine l'état initial du jeu
-    requestAnimationFrame(update);// Lance la boucle de mise à jour du jeu
+// Contrôles “appui continu” pour les flèches (souris + touch)
+function startHold(side) {
+  if (side === 'left') {
+    raquette.dx = -raquette.speed;
+    leftBtn.classList.add('hold-left');   // géré côté CSS pour jaune pâle
+  } else {
+    raquette.dx = raquette.speed;
+    rightBtn.classList.add('hold-right'); // géré côté CSS pour rouge pâle
+  }
 }
 
-/** fonction startGame() : Démarre une nouvelle partie */
-
-function draw() {// Dessine tous les éléments du jeu
-    ctx.clearRect(0, 0, canvas.width, canvas.height);// Efface le canvas
-
-    // Balle
-    ctx.beginPath();
-    ctx.arc(balle.x, balle.y, balle.r, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
-    ctx.fill();
-    ctx.closePath();
-
-    // Raquette
-    ctx.fillStyle = "#4af";
-    ctx.fillRect(raquette.x, raquette.y, raquette.w, raquette.h);
-
-    // Score
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.textAlign = "center";
-    ctx.fillText(`Score : ${score}s`, canvas.width / 2, canvas.height - 10);
-
-    // Message de fin
-    if (gameOver) {
-        ctx.font = "32px Arial";
-        ctx.fillStyle = "#f44";
-        ctx.fillText("Perdu !", canvas.width / 2, canvas.height / 2);
-        ctx.font = "18px Arial";
-        ctx.fillStyle = "#fff";
-        ctx.fillText("Appuie sur Start pour rejouer", canvas.width / 2, canvas.height / 2 + 40);
-    }
+// Arrêt appui continu
+function stopHold() {
+  if (!keyLeftDown && !keyRightDown) raquette.dx = 0;// Arrêt du déplacement si pas de touche clavier ou enfoncée
 }
 
-/**
-* fonction draw() : Dessine tous les éléments du jeu (balle, raquette, score, message de fin)
- */
+// Souris
+leftBtn.addEventListener('mousedown', () => startHold('left'));
+rightBtn.addEventListener('mousedown', () => startHold('right'));
+window.addEventListener('mouseup', stopHold);
+leftBtn.addEventListener('mouseleave', stopHold);
+rightBtn.addEventListener('mouseleave', stopHold);
+
+// Tactile
+leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startHold('left'); }, { passive: false });
+rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startHold('right'); }, { passive: false });
+window.addEventListener('touchend', stopHold, { passive: true });
+window.addEventListener('touchcancel', stopHold, { passive: true });
+
+// Lancement du Jeu 
+function startGame() {
+  if (gameRunning) return;
+  gameRunning = true;
+  gameOver = false;
+  score = 0;
+  startTime = Date.now();
+
+  // Position balle
+  balle.x = canvas.width / 2;
+  balle.y = canvas.height / 2;
+
+  // Angle aléatoire entre 30° et 150°
+  let angle = (Math.random() * 120 + 30) * Math.PI / 180;
+  balle.dx = balle.speed * Math.cos(angle);
+  balle.dy = -balle.speed * Math.sin(angle);
+
+  // Raquette centrée
+  raquette.x = canvas.width / 2 - raquette.w / 2;
+
+  draw();// Premier dessin
+  requestAnimationFrame(update);// Lancement de la boucle de jeu
+}
+
+//  Dessiner le jeu
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Balle
+  ctx.beginPath();
+  ctx.arc(balle.x, balle.y, balle.r, 0, Math.PI * 2);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+  ctx.closePath();
+
+  // Raquette
+  ctx.fillStyle = "#4af";
+  ctx.fillRect(raquette.x, raquette.y, raquette.w, raquette.h);
+
+  // affichage du Score
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.fillText(`Score : ${score}s`, canvas.width / 2, canvas.height - 10);
+
+  // Annonce le message de fin
+  if (gameOver) {
+    ctx.font = "32px Arial";
+    ctx.fillStyle = "#f44";
+    ctx.fillText("Perdu !", canvas.width / 2, canvas.height / 2);
+    ctx.font = "18px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Appuie sur Start pour rejouer", canvas.width / 2, canvas.height / 2 + 40);
+  }
+}
 
 function update() {
-    if (!gameRunning) return;
+  if (!gameRunning) return;
 
-    // Déplacement de la balle
-    balle.x += balle.dx;
-    balle.y += balle.dy;
+  // Déplacement de la balle
+  balle.x += balle.dx;
+  balle.y += balle.dy;
 
-    // Collisions avec les murs
-    if (balle.x - balle.r < 0) {
-        balle.x = balle.r;
-        balle.dx *= -1;
-    }
-    if (balle.x + balle.r > canvas.width) {
-        balle.x = canvas.width - balle.r;
-        balle.dx *= -1;
-    }
-    if (balle.y - balle.r < 0) {
-        balle.y = balle.r;
-        balle.dy *= -1;
-    }
+  // Collisions murs
+  if (balle.x - balle.r < 0){
+    balle.x = balle.r;
+    balle.dx *= -1;
+  }
+  if (balle.x + balle.r > canvas.width){
+    balle.x = canvas.width - balle.r;
+    balle.dx *= -1;
+  }
+  if (balle.y - balle.r < 0){
+    balle.y = balle.r;
+    balle.dy *= -1;
+  }
 
-    // Collision avec la raquette
-    if (
-        balle.y + balle.r >= raquette.y &&
-        balle.x > raquette.x &&
-        balle.x < raquette.x + raquette.w &&
-        balle.dy > 0
-    ) {
-        balle.y = raquette.y - balle.r;
-        balle.dy *= -1;
-    }
+  // Collision raquette (rebond vertical simple)
+  if (
+    balle.y + balle.r >= raquette.y &&
+    balle.x > raquette.x &&
+    balle.x < raquette.x + raquette.w &&
+    balle.dy > 0
+  )
+  {
+    balle.y = raquette.y - balle.r;// Évite que la balle "s'incruste" dans la raquette
+    balle.dy *= -1;// Rebond
+  }
 
-    // Si la balle est ratée
-    if (balle.y - balle.r > canvas.height) {
-        gameRunning = false;
-        gameOver = true;
-        draw();
-        return;
-    }
-
-    // Déplacement de la raquette
-    raquette.x += raquette.dx;
-    if (raquette.x < 0) raquette.x = 0;
-    if (raquette.x + raquette.w > canvas.width) raquette.x = canvas.width - raquette.w;
-
-    // Score
-    score = Math.floor((Date.now() - startTime) / 1000);
-
+  // Perdu ?
+  if (balle.y - balle.r > canvas.height) {
+    gameRunning = false;
+    gameOver = true;
     draw();
-    requestAnimationFrame(update);
+    return;
+  }
+
+  // Déplacement raquette
+  raquette.x += raquette.dx;
+  if (raquette.x < 0) raquette.x = 0;
+  if (raquette.x + raquette.w > canvas.width) raquette.x = canvas.width - raquette.w;
+
+  // Score
+  score = Math.floor((Date.now() - startTime) / 1000);
+
+  // Prochain frame
+  draw();
+  requestAnimationFrame(update);
 }
 
-/**
-* fonction update() : Met à jour l'état du jeu (position de la balle, collisions, score)
- */
-draw(); // Dessine l'état initial
-update(); // Lance la boucle de mise à jour du jeu
+/*creéation du jeu en le dessinant et le mettant à jour*/
 
-
-
-
-
-
-
-
+draw();
+update();
