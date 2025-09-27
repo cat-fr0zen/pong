@@ -1,4 +1,4 @@
-/* Jeu de Pong simple avec raquette contrôlée par flèches, boutons et tactile*/
+﻿/* Jeu de Pong simple avec raquette contrôlée par flèches, boutons et tactile*/
 const canvas = document.getElementById('écran_de_jeu');
 const ctx = canvas.getContext('2d');
 // Taille du canvas
@@ -9,6 +9,7 @@ let score = 0;
 let startTime = 0; 
 let gameRunning = false;
 let gameOver = false;
+const MIN_HORIZONTAL_RATIO = 0.15;// Pour éviter les angles trop plats
 // Boutons
 const startBtn = document.getElementById('start');
 const resetBtn = document.getElementById('reset');
@@ -50,6 +51,7 @@ resetBtn.onclick = () => {
   balle.dx = 0;
   balle.dy = 0;
   balle.speed = BASE_BALL_SPEED;
+  placeballeaudessusraquette();
   draw();
 };
 
@@ -79,7 +81,7 @@ document.addEventListener('keyup', (e) => {
 function startHold(side) {
   if (side === 'left') {
     raquette.dx = -raquette.speed;
-    leftBtn.classList.add('hold-left');   // géré côté CSS pour jaune pâle
+    leftBtn.classList.add('hold-left');
   } else {
     raquette.dx = raquette.speed;
     rightBtn.classList.add('hold-right');
@@ -104,17 +106,24 @@ rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startHold('
 window.addEventListener('touchend', stopHold, { passive: true });
 window.addEventListener('touchcancel', stopHold, { passive: true });
 
+placeballeaudessusraquette();// Place la balle au-dessus de la raquette au départ
+
 // Augmente la vitesse de la balle à chaque rebond sur la raquette
+
 const BASE_BALL_SPEED = balle.speed;
 
 function increaseBallSpeed() {
   const currentSpeed = Math.hypot(balle.dx, balle.dy) || BASE_BALL_SPEED;
-  const newSpeed = currentSpeed + BASE_BALL_SPEED + 0.2;
-  const scale = newSpeed / currentSpeed;
+  const nextSpeed = Math.min(currentSpeed + BASE_BALL_SPEED + 0.2, BASE_BALL_SPEED * 5);
+  const scale = nextSpeed / currentSpeed;
   balle.dx *= scale;
   balle.dy *= scale;
 }
 
+function placeballeaudessusraquette() {
+  balle.x = raquette.x + raquette.w / 2;
+  balle.y = raquette.y - balle.r - 1;
+}
 
 // Lancement du Jeu 
 function startGame() {
@@ -124,15 +133,22 @@ function startGame() {
   score = 0;
   startTime = Date.now();
 
-  // Position balle
-  balle.x = canvas.width / 2;
-  balle.y = canvas.height / 2;
+  // Raquette centrée
+  raquette.x = canvas.width / 2 - raquette.w / 2;
+
+  // Balle placée juste au-dessus de la raquette
+  placeballeaudessusraquette();
   balle.speed = BASE_BALL_SPEED;
+
+  // Balle placée juste au-dessus de la raquette
+  balle.x = raquette.x + raquette.w / 2;
+  balle.y = raquette.y - balle.r - 1;
 
   // Angle aléatoire entre 30° et 150°
   let angle = (Math.random() * 120 + 30) * Math.PI / 180;
   balle.dx = balle.speed * Math.cos(angle);
   balle.dy = -balle.speed * Math.sin(angle);
+  antiangle90(-1);
 
   // Raquette centrée
   raquette.x = canvas.width / 2 - raquette.w / 2;
@@ -213,9 +229,10 @@ function update() {
     balle.y = raquette.y - balle.r;// Évite que la balle "s'incruste" dans la raquette
     balle.dy *= -1;
     increaseBallSpeed();
+    antiangle90(-1);
   }
 
-  // Perdu ?
+  // Perdu si la balle touche le bas
   if (balle.y - balle.r > canvas.height) {
     gameRunning = false;
     gameOver = true;
@@ -236,10 +253,21 @@ function update() {
   requestAnimationFrame(update);
 }
 
-/*creéation du jeu en le dessinant et le mettant à jour*/
+function antiangle90(defaultYDirection) {
+  const speed = Math.hypot(balle.dx, balle.dy) || BASE_BALL_SPEED;
+  let nx = balle.dx / speed;
+  let ny = balle.dy / speed || defaultYDirection;
+  if (Math.abs(nx) < MIN_HORIZONTAL_RATIO) {
+    const signX = nx === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(nx);
+    nx = signX * MIN_HORIZONTAL_RATIO;
+    ny = Math.sign(ny || defaultYDirection) * Math.sqrt(Math.max(0, 1 - nx * nx));
+  }
+  balle.dx = nx * speed;
+  balle.dy = ny * speed;
+}
+
+
+/*création du jeu en le dessinant et le mettant à jour*/
 
 draw();
 update();
-
-
-//TODO trajectoire plus aléatoire de la balle
