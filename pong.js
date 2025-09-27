@@ -158,21 +158,25 @@ function draw() {
 
   // affichage du Score
   ctx.font = "20px Arial";
-  ctx.fillStyle = "rgba(223, 229, 233, 1)";
+  ctx.fillStyle = "hsla(204, 19%, 89%, 1.00)";
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillText(`Score : ${score}s`, 10, 10);
 
-  // Annonce le message de fin
+  // Annonce le message de fin de partie
   if (gameOver) {
     ctx.font = "32px Arial";
     ctx.fillStyle = "#f44";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillText("Perdu !", canvas.width / 2, canvas.height / 2);
     ctx.font = "18px Arial";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; 
     ctx.fillText("Appuie sur Start pour rejouer", canvas.width / 2, canvas.height / 2 + 40);
   }
 }
+
+
 
 function update() {
   if (!gameRunning) return;
@@ -236,3 +240,6 @@ function update() {
 
 draw();
 update();
+
+
+//TODO trajectoire plus aléatoire de la balle
