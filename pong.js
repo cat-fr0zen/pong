@@ -198,8 +198,6 @@ function draw() {
   }
 }
 
-
-
 function update() {
   if (!gameRunning) return;
 
