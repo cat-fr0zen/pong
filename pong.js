@@ -30,7 +30,7 @@ let balle = {
   x: canvas.width / 2,
   y: canvas.height / 2,
   r: 10,
-  speed: 4,
+  speed: 1,
   dx: 0,
   dy: 0
 };
@@ -49,6 +49,7 @@ resetBtn.onclick = () => {
   raquette.dx = 0;
   balle.dx = 0;
   balle.dy = 0;
+  balle.speed = BASE_BALL_SPEED;
   draw();
 };
 
@@ -81,7 +82,7 @@ function startHold(side) {
     leftBtn.classList.add('hold-left');   // géré côté CSS pour jaune pâle
   } else {
     raquette.dx = raquette.speed;
-    rightBtn.classList.add('hold-right'); // géré côté CSS pour rouge pâle
+    rightBtn.classList.add('hold-right');
   }
 }
 
@@ -103,6 +104,18 @@ rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startHold('
 window.addEventListener('touchend', stopHold, { passive: true });
 window.addEventListener('touchcancel', stopHold, { passive: true });
 
+// Augmente la vitesse de la balle à chaque rebond sur la raquette
+const BASE_BALL_SPEED = balle.speed;
+
+function increaseBallSpeed() {
+  const currentSpeed = Math.hypot(balle.dx, balle.dy) || BASE_BALL_SPEED;
+  const newSpeed = currentSpeed + BASE_BALL_SPEED + 0.2;
+  const scale = newSpeed / currentSpeed;
+  balle.dx *= scale;
+  balle.dy *= scale;
+}
+
+
 // Lancement du Jeu 
 function startGame() {
   if (gameRunning) return;
@@ -114,6 +127,7 @@ function startGame() {
   // Position balle
   balle.x = canvas.width / 2;
   balle.y = canvas.height / 2;
+  balle.speed = BASE_BALL_SPEED;
 
   // Angle aléatoire entre 30° et 150°
   let angle = (Math.random() * 120 + 30) * Math.PI / 180;
@@ -144,9 +158,10 @@ function draw() {
 
   // affichage du Score
   ctx.font = "20px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.fillText(`Score : ${score}s`, canvas.width / 2, canvas.height - 10);
+  ctx.fillStyle = "rgba(223, 229, 233, 1)";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillText(`Score : ${score}s`, 10, 10);
 
   // Annonce le message de fin
   if (gameOver) {
@@ -170,14 +185,17 @@ function update() {
   if (balle.x - balle.r < 0){
     balle.x = balle.r;
     balle.dx *= -1;
+    increaseBallSpeed();
   }
   if (balle.x + balle.r > canvas.width){
     balle.x = canvas.width - balle.r;
     balle.dx *= -1;
+    increaseBallSpeed();
   }
   if (balle.y - balle.r < 0){
     balle.y = balle.r;
     balle.dy *= -1;
+    increaseBallSpeed();
   }
 
   // Collision raquette (rebond vertical simple)
@@ -189,7 +207,8 @@ function update() {
   )
   {
     balle.y = raquette.y - balle.r;// Évite que la balle "s'incruste" dans la raquette
-    balle.dy *= -1;// Rebond
+    balle.dy *= -1;
+    increaseBallSpeed();
   }
 
   // Perdu ?
