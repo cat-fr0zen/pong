@@ -10,6 +10,10 @@ let startTime = 0;
 let gameRunning = false;
 let gameOver = false;
 const MIN_HORIZONTAL_RATIO = 0.15;// Pour éviter les angles trop plats
+// Meilleur score (stocké dans le localStorage)
+const BEST_SCORE_KEY = 'pongBestScore';
+let bestScore = Number(localStorage.getItem(BEST_SCORE_KEY)) || 0;
+
 // Boutons
 const startBtn = document.getElementById('start');
 const resetBtn = document.getElementById('reset');
@@ -178,6 +182,8 @@ function draw() {
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillText(`Score : ${score}s`, 10, 10);
+  // Affichage du meilleur score
+  ctx.fillText(`Record : ${bestScore}s`, 10, 35);
 
   // Annonce le message de fin de partie
   if (gameOver) {
@@ -248,11 +254,18 @@ function update() {
   // Score
   score = Math.floor((Date.now() - startTime) / 1000);
 
+  // Mise à jour du meilleur score
+  if (score > bestScore) {
+    bestScore = score;
+    localStorage.setItem(BEST_SCORE_KEY, bestScore);
+  }
+
   // Prochain frame
   draw();
   requestAnimationFrame(update);
 }
 
+// Évite les angles trop plats (proche de 90°)
 function antiangle90(defaultYDirection) {
   const speed = Math.hypot(balle.dx, balle.dy) || BASE_BALL_SPEED;
   let nx = balle.dx / speed;
